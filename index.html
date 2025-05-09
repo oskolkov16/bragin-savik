@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRAGIN DTF</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    #preloader {
+      position: fixed;
+      z-index: 9999;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #181818;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s;
+    }
+    #preloader.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #preloader .loader {
+      border: 6px solid #444;
+      border-top: 6px solid #fff;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+  </style>
+
+<body>
+  <div id="preloader">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <div class="loader"></div>
+      <div id="preloader-timer" style="color:#fff; margin-top:12px; font-family:Nunito,sans-serif; font-size:18px; text-align:center;">Осталось: 3 сек.</div>
+    </div>
+  </div>
+  <video class="bg-video" src="video/bg.mp4" autoplay loop muted playsinline></video>
+  <div class="overlay"></div>
+  <div class="card">
+    <h1>Савелий Садков</h1>
+    <p>
+      Сегодня на Моча Трейд поднял более 13 000$.<br>
+      Я вот думаю, что лучше взять к великолепной<br>немецкой пицце - доктор пеппер или айрн брю?<br>
+    </p>
+    <div class="icons">
+      <a class="icon-link" href="https://open.spotify.com/user/3163cyxk7smklgz7gvpmlvyip4z4" target="_blank" title="Spotify">
+        <img src="https://www.svgrepo.com/show/355256/spotify.svg" alt="Spotify" width="24" height="24">
+      </a>
+      <a class="icon-link" href="https://steamcommunity.com/id/attackofapathy/" target="_blank" title="Steam">
+        <img src="https://www.svgrepo.com/show/473800/steam.svg" alt="Steam" width="24" height="24">
+      </a>
+      <a class="icon-link" href="https://www.twitch.tv/apathyenjoyer" target="_blank" title="Twitch">
+        <img src="https://www.svgrepo.com/show/448251/twitch.svg" alt="Twitch" width="24" height="24">
+      </a>
+    </div>
+<div class="music-switcher">
+      <button class="music-btn play" title="Воспроизвести/Пауза">&#9654;</button>
+      <span class="music-track"><span id="track-name"></span></span>
+    </div>
+  </div>
+<script src="js/music-switcher.js"></script>
+  <script>
+    // Таймер ожидания (3 секунды)
+    var seconds = 3;
+    var timerText = document.getElementById('preloader-timer');
+    var preloader = document.getElementById('preloader');
+    var timerInterval = setInterval(function() {
+      seconds--;
+      if (seconds > 0) {
+        timerText.textContent = 'Осталось: ' + seconds + ' сек.';
+      } else {
+        timerText.textContent = 'Загрузка...';
+        clearInterval(timerInterval);
+      }
+    }, 1000);
+
+    // Скрытие прелоадера после загрузки или по истечении времени
+    function hidePreloader() {
+      if (!preloader.classList.contains('hide')) {
+        preloader.classList.add('hide');
+      }
+    }
+    window.addEventListener('load', function() {
+      setTimeout(hidePreloader, 200);
+    });
+    setTimeout(hidePreloader, 3200); // максимум 3.2 сек
+  </script>
+</body>
+
+</html>
+<script src="js/background.js"></script>
+<script src="js/motion.js"></script>
