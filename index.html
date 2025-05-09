@@ -31,6 +31,9 @@
       height: 48px;
       animation: spin 1s linear infinite;
     }
+    .hidden-until-video-ready {
+      display: none !important;
+    }
     @keyframes spin {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
@@ -44,9 +47,9 @@
       <div id="preloader-timer" style="color:#fff; margin-top:12px; font-family:Nunito,sans-serif; font-size:18px; text-align:center;">Осталось: 3 сек.</div>
     </div>
   </div>
-  <video class="bg-video" src="video/bg.mp4" autoplay loop muted playsinline></video>
-  <div class="overlay"></div>
-  <div class="card">
+  <video class="bg-video hidden-until-video-ready" src="video/bg.mp4" autoplay loop muted playsinline></video>
+  <div class="overlay hidden-until-video-ready"></div>
+  <div class="card hidden-until-video-ready">
     <h1>Савелий Садков</h1>
     <p>
       Сегодня на Моча Трейд поднял более 13 000$.<br>
@@ -74,6 +77,8 @@
     var seconds = 3;
     var timerText = document.getElementById('preloader-timer');
     var preloader = document.getElementById('preloader');
+    var video = document.querySelector('.bg-video');
+    var elementsToShow = document.querySelectorAll('.hidden-until-video-ready');
     var timerInterval = setInterval(function() {
       seconds--;
       if (seconds > 0) {
@@ -84,16 +89,37 @@
       }
     }, 1000);
 
-    // Скрытие прелоадера после загрузки или по истечении времени
-    function hidePreloader() {
+    // Скрытие прелоадера только после полной загрузки видео и старта воспроизведения
+    function showContentAndHidePreloader() {
       if (!preloader.classList.contains('hide')) {
         preloader.classList.add('hide');
+        elementsToShow.forEach(function(el) {
+          el.classList.remove('hidden-until-video-ready');
+        });
       }
     }
-    window.addEventListener('load', function() {
-      setTimeout(hidePreloader, 200);
+
+    // Ждём полной загрузки видео и старта воспроизведения
+    let videoLoaded = false;
+    let videoPlayed = false;
+
+    video.addEventListener('loadeddata', function() {
+      videoLoaded = true;
+      if (videoPlayed) showContentAndHidePreloader();
     });
-    setTimeout(hidePreloader, 3200); // максимум 3.2 сек
+
+    video.addEventListener('play', function() {
+      videoPlayed = true;
+      if (videoLoaded) showContentAndHidePreloader();
+    });
+
+    // На случай, если видео не может проиграться автоматически (например, из-за политики браузера)
+    setTimeout(function() {
+      if (!(videoLoaded && videoPlayed)) {
+        showContentAndHidePreloader();
+      }
+    }, 10000); // максимум 10 сек ожидания
+
   </script>
 </body>
 
