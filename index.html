@@ -89,7 +89,32 @@
       }
     }, 1000);
 
-    // Скрытие прелоадера только после полной загрузки видео и старта воспроизведения
+    // Ожидание загрузки всех изображений на странице
+    function waitForImagesLoaded(callback) {
+      var images = Array.from(document.images);
+      var loaded = 0;
+      if (images.length === 0) {
+        callback();
+        return;
+      }
+      images.forEach(function(img) {
+        if (img.complete && img.naturalHeight !== 0) {
+          loaded++;
+          if (loaded === images.length) callback();
+        } else {
+          img.addEventListener('load', function() {
+            loaded++;
+            if (loaded === images.length) callback();
+          });
+          img.addEventListener('error', function() {
+            loaded++;
+            if (loaded === images.length) callback();
+          });
+        }
+      });
+    }
+
+    // Скрытие прелоадера только после полной загрузки всех ресурсов
     function showContentAndHidePreloader() {
       if (!preloader.classList.contains('hide')) {
         preloader.classList.add('hide');
@@ -99,25 +124,39 @@
       }
     }
 
-    // Ждём полной загрузки видео и старта воспроизведения
+    // Ждём полной загрузки видео, изображений и window.onload
     let videoLoaded = false;
     let videoPlayed = false;
+    let imagesLoaded = false;
+    let windowLoaded = false;
+
+    function tryShowContent() {
+      if (videoLoaded && videoPlayed && imagesLoaded && windowLoaded) {
+        showContentAndHidePreloader();
+      }
+    }
 
     video.addEventListener('loadeddata', function() {
       videoLoaded = true;
-      if (videoPlayed) showContentAndHidePreloader();
+      tryShowContent();
     });
 
     video.addEventListener('play', function() {
       videoPlayed = true;
-      if (videoLoaded) showContentAndHidePreloader();
+      tryShowContent();
     });
 
-    // На случай, если видео не может проиграться автоматически (например, из-за политики браузера)
+    window.addEventListener('load', function() {
+      windowLoaded = true;
+      waitForImagesLoaded(function() {
+        imagesLoaded = true;
+        tryShowContent();
+      });
+    });
+
+    // На случай, если что-то не загрузилось за 10 секунд
     setTimeout(function() {
-      if (!(videoLoaded && videoPlayed)) {
-        showContentAndHidePreloader();
-      }
+      showContentAndHidePreloader();
     }, 10000); // максимум 10 сек ожидания
 
   </script>
