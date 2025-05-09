@@ -23,33 +23,30 @@
       opacity: 0;
       pointer-events: none;
     }
-    #preloader .loader {
-      border: 6px solid #444;
-      border-top: 6px solid #fff;
-      border-radius: 50%;
+    #preloader .spinner {
       width: 48px;
       height: 48px;
+      border: 5px solid #444;
+      border-top: 5px solid #fff;
+      border-radius: 50%;
       animation: spin 1s linear infinite;
-    }
-    .hidden-until-video-ready {
-      display: none !important;
     }
     @keyframes spin {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
     }
+    .preload-hidden {
+      display: none !important;
+    }
   </style>
 
 <body>
   <div id="preloader">
-    <div style="display:flex; flex-direction:column; align-items:center;">
-      <div class="loader"></div>
-      <div id="preloader-timer" style="color:#fff; margin-top:12px; font-family:Nunito,sans-serif; font-size:18px; text-align:center;">Осталось: 3 сек.</div>
-    </div>
+    <div class="spinner"></div>
   </div>
-  <video class="bg-video hidden-until-video-ready" src="video/bg.mp4" autoplay loop muted playsinline></video>
-  <div class="overlay hidden-until-video-ready"></div>
-  <div class="card hidden-until-video-ready">
+  <video class="bg-video preload-hidden" src="video/bg.mp4" autoplay loop muted playsinline></video>
+  <div class="overlay preload-hidden"></div>
+  <div class="card preload-hidden">
     <h1>Савелий Садков</h1>
     <p>
       Сегодня на Моча Трейд поднял более 13 000$.<br>
@@ -73,92 +70,21 @@
   </div>
 <script src="js/music-switcher.js"></script>
   <script>
-    // Таймер ожидания (3 секунды)
-    var seconds = 3;
-    var timerText = document.getElementById('preloader-timer');
-    var preloader = document.getElementById('preloader');
-    var video = document.querySelector('.bg-video');
-    var elementsToShow = document.querySelectorAll('.hidden-until-video-ready');
-    var timerInterval = setInterval(function() {
-      seconds--;
-      if (seconds > 0) {
-        timerText.textContent = 'Осталось: ' + seconds + ' сек.';
-      } else {
-        timerText.textContent = 'Загрузка...';
-        clearInterval(timerInterval);
-      }
-    }, 1000);
+    // Новый прелоадер: показываем до полной загрузки видео
+    const preloader = document.getElementById('preloader');
+    const video = document.querySelector('.bg-video');
+    const elementsToShow = document.querySelectorAll('.preload-hidden');
 
-    // Ожидание загрузки всех изображений на странице
-    function waitForImagesLoaded(callback) {
-      var images = Array.from(document.images);
-      var loaded = 0;
-      if (images.length === 0) {
-        callback();
-        return;
-      }
-      images.forEach(function(img) {
-        if (img.complete && img.naturalHeight !== 0) {
-          loaded++;
-          if (loaded === images.length) callback();
-        } else {
-          img.addEventListener('load', function() {
-            loaded++;
-            if (loaded === images.length) callback();
-          });
-          img.addEventListener('error', function() {
-            loaded++;
-            if (loaded === images.length) callback();
-          });
-        }
-      });
+    function showContent() {
+      preloader.classList.add('hide');
+      elementsToShow.forEach(el => el.classList.remove('preload-hidden'));
     }
 
-    // Скрытие прелоадера только после полной загрузки всех ресурсов
-    function showContentAndHidePreloader() {
-      if (!preloader.classList.contains('hide')) {
-        preloader.classList.add('hide');
-        elementsToShow.forEach(function(el) {
-          el.classList.remove('hidden-until-video-ready');
-        });
-      }
-    }
+    // Скрываем прелоадер после полной загрузки видео
+    video.addEventListener('canplaythrough', showContent);
 
-    // Ждём полной загрузки видео, изображений и window.onload
-    let videoLoaded = false;
-    let videoPlayed = false;
-    let imagesLoaded = false;
-    let windowLoaded = false;
-
-    function tryShowContent() {
-      if (videoLoaded && videoPlayed && imagesLoaded && windowLoaded) {
-        showContentAndHidePreloader();
-      }
-    }
-
-    video.addEventListener('loadeddata', function() {
-      videoLoaded = true;
-      tryShowContent();
-    });
-
-    video.addEventListener('play', function() {
-      videoPlayed = true;
-      tryShowContent();
-    });
-
-    window.addEventListener('load', function() {
-      windowLoaded = true;
-      waitForImagesLoaded(function() {
-        imagesLoaded = true;
-        tryShowContent();
-      });
-    });
-
-    // На случай, если что-то не загрузилось за 10 секунд
-    setTimeout(function() {
-      showContentAndHidePreloader();
-    }, 10000); // максимум 10 сек ожидания
-
+    // На случай, если видео не загрузилось за 10 секунд
+    setTimeout(showContent, 10000);
   </script>
 </body>
 
